@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>직업 추천 검사</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        /* 로그인 화면 스타일 */
+        .login-screen {
+            text-align: center;
+        }
+        
+        .login-screen h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .input-group {
+            text-align: left;
+        }
+        
+        .input-group label {
+            display: block;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-login {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        /* 관리자 페이지 스타일 */
+        .admin-screen {
+            display: none;
+        }
+        
+        .admin-screen.active {
+            display: block;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .admin-header h2 {
+            color: #333;
+            font-size: 24px;
+        }
+        
+        .btn-logout {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .user-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .user-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .user-info {
+            color: #666;
+            line-height: 1.8;
+        }
+        
+        .progress-container {
+            margin-bottom: 30px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .question-container {
+            display: none;
+        }
+        
+        .question-container.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .question {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        
+        .option:hover {
+            background: #f0f0ff;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-prev {
+            background: #e0e0e0;
+            color: #666;
+        }
+        
+        .btn-prev:hover {
+            background: #d0d0d0;
+        }
+        
+        .btn-next {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-next:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .start-screen, .result-screen {
+            text-align: center;
+        }
+        
+        .start-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .start-screen ul {
+            text-align: left;
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+        
+        .start-screen li {
+            margin: 10px 0;
+            color: #666;
+        }
+        
+        .btn-start {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            padding: 18px 50px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .result-screen {
+            display: none;
+        }
+        
+        .result-screen.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .result-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .result-job {
+            font-size: 36px;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .result-description {
+            color: #666;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .btn-restart {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-restart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .welcome-text {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 직업 추천 검사</h1>
+            <p>당신에게 딱 맞는 직업을 찾아드립니다</p>
+        </div>
+        
+        <!-- 로그인 화면 -->
+        <div class="login-screen" id="loginScreen">
+            <h2>로그인</h2>
+            <div class="login-form">
+                <div class="input-group">
+                    <label for="username">이름</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="button" class="btn-login" onclick="login()">로그인</button>
+                <div class="error-message" id="errorMessage">비밀번호가 올바르지 않습니다.</div>
+            </div>
+        </div>
+
+        <!-- 관리자 페이지 -->
+        <div class="admin-screen" id="adminScreen">
+            <div class="admin-header">
+                <h2>👑 관리자 페이지</h2>
+                <button class="btn-logout" onclick="logout()">로그아웃</button>
+            </div>
+            <div class="user-list" id="userList"></div>
+        </div>
+        
+        <!-- 검사 시작 화면 -->
+        <div class="start-screen" id="startScreen" style="display: none;">
+            <div class="user-header">
+                <h2>검사를 시작하기 전에</h2>
+                <div>
+                    <span class="welcome-text" id="welcomeText"></span>
+                    <button class="btn-logout" onclick="logout()" style="margin-left: 15px;">로그아웃</button>
+                </div>
+            </div>
+            <ul>
+                <li>총 25개의 질문에 답하게 됩니다</li>
+                <li>각 질문에 솔직하게 답해주세요</li>
+                <li>정답은 없으며, 여러분의 성향을 파악하기 위한 것입니다</li>
+                <li>약 5분 정도 소요됩니다</li>
+            </ul>
+            <button class="btn-start" onclick="startTest()">검사 시작하기</button>
+        </div>
+        
+        <div id="testContent" style="display: none;">
+            <div class="user-header">
+                <div class="welcome-text" id="welcomeTextTest"></div>
+                <button class="btn-logout" onclick="logout()">로그아웃</button>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">1 / 25</div>
+            </div>
+            
+            <div id="questionsContainer"></div>
+            
+            <div class="button-container">
+                <button class="btn-prev" onclick="prevQuestion()" id="btnPrev" style="display: none;">이전</button>
+                <button class="btn-next" onclick="nextQuestion()" id="btnNext" disabled>다음</button>
+            </div>
+        </div>
+        
+        <div class="result-screen" id="resultScreen">
+            <div class="result-icon">🎉</div>
+            <div class="result-job" id="resultJob"></div>
+            <div class="result-description" id="resultDescription"></div>
+            <button class="btn-restart" onclick="restartTest()">다시 검사하기</button>
+            <button class="btn-logout" onclick="logout()" style="margin-left: 10px;">로그아웃</button>
+        </div>
+    </div>
+    
+    <script>
+        let currentUser = null;
+        let currentQuestion = 0;
+        let answers = {};
+        
+        const questions = [
+            {
+                q: "선호하는 작업 환경은?",
+                options: [
+                    { text: "실내에서 편안하게", scores: { office: 5, outdoor: 0, mobile: 1 } },
+                    { text: "야외에서 활동적으로", scores: { office: 0, outdoor: 5, mobile: 3 } },
+                    { text: "실내와 실외를 오가며", scores: { office: 2, outdoor: 3, mobile: 4 } },
+                    { text: "이동이 많은 환경", scores: { office: 1, outdoor: 2, mobile: 5 } }
+                ]
+            },
+            {
+                q: "사람들과의 상호작용은?",
+                options: [
+                    { text: "혼자 집중하는 것을 선호", scores: { social: 0, team: 1, solo: 5 } },
+                    { text: "소수의 팀원과 협력", scores: { social: 2, team: 5, solo: 2 } },
+                    { text: "많은 사람들과 교류", scores: { social: 5, team: 3, solo: 0 } },
+                    { text: "고객 응대를 즐김", scores: { social: 5, team: 2, solo: 0, service: 5 } }
+                ]
+            },
+            {
+                q: "신체 활동 선호도는?",
+                options: [
+                    { text: "거의 움직이지 않는 작업", scores: { physical: 0, mental: 5 } },
+                    { text: "가끔 움직이는 정도", scores: { physical: 2, mental: 3 } },
+                    { text: "적당히 활동적인 작업", scores: { physical: 4, mental: 2 } },
+                    { text: "매우 활동적이고 체력 필요", scores: { physical: 5, mental: 1 } }
+                ]
+            },
+            {
+                q: "사고 방식은?",
+                options: [
+                    { text: "창의적이고 예술적", scores: { creative: 5, analytical: 1, practical: 1 } },
+                    { text: "분석적이고 논리적", scores: { creative: 1, analytical: 5, practical: 2 } },
+                    { text: "실용적이고 현실적", scores: { creative: 1, analytical: 2, practical: 5 } },
+                    { text: "체계적이고 관습적", scores: { creative: 0, analytical: 3, practical: 3, conventional: 5 } }
+                ]
+            },
+            {
+                q: "컴퓨터 기술 활용도는?",
+                options: [
+                    { text: "전혀 사용하지 않음", scores: { tech: 0, manual: 5 } },
+                    { text: "기본적인 사용만", scores: { tech: 2, manual: 3 } },
+                    { text: "능숙하게 활용", scores: { tech: 4, manual: 1 } },
+                    { text: "전문적으로 다룸", scores: { tech: 5, manual: 0, it: 5 } }
+                ]
+            },
+            {
+                q: "기계나 도구 사용은?",
+                options: [
+                    { text: "전혀 사용하지 않음", scores: { mechanical: 0, handson: 0 } },
+                    { text: "간단한 도구 사용", scores: { mechanical: 2, handson: 2 } },
+                    { text: "복잡한 기계 조작", scores: { mechanical: 4, handson: 4 } },
+                    { text: "정밀 기계 전문", scores: { mechanical: 5, handson: 5, technical: 5 } }
+                ]
+            },
+            {
+                q: "학습과 자격증에 대한 의지는?",
+                options: [
+                    { text: "특별한 학습 불필요", scores: { education: 0, entry: 5 } },
+                    { text: "단기 교육 가능", scores: { education: 2, entry: 3 } },
+                    { text: "전문 교육 필요", scores: { education: 4, entry: 1, professional: 3 } },
+                    { text: "고도의 전문성 필요", scores: { education: 5, entry: 0, professional: 5 } }
+                ]
+            },
+            {
+                q: "의사결정과 책임감은?",
+                options: [
+                    { text: "지시받는 것 선호", scores: { leadership: 0, responsibility: 1 } },
+                    { text: "부분적 책임 가능", scores: { leadership: 2, responsibility: 3 } },
+                    { text: "독립적 의사결정", scores: { leadership: 4, responsibility: 4 } },
+                    { text: "큰 책임과 리더십", scores: { leadership: 5, responsibility: 5, management: 5 } }
+                ]
+            },
+            {
+                q: "위험과 스트레스 감수는?",
+                options: [
+                    { text: "안전하고 평온함", scores: { risk: 0, stress: 0 } },
+                    { text: "약간의 긴장감", scores: { risk: 2, stress: 2 } },
+                    { text: "적당한 도전", scores: { risk: 3, stress: 3 } },
+                    { text: "높은 위험 감수", scores: { risk: 5, stress: 5, emergency: 5 } }
+                ]
+            },
+            {
+                q: "가장 중요하게 여기는 가치는?",
+                options: [
+                    { text: "사회 봉사와 도움", scores: { service: 5, helping: 5, care: 5 } },
+                    { text: "경제적 보상", scores: { income: 5, business: 3 } },
+                    { text: "안정성과 보장", scores: { stability: 5, conventional: 3 } },
+                    { text: "자율성과 창의성", scores: { autonomy: 5, creative: 4 } }
+                ]
+            },
+            {
+                q: "예술적 표현 활동은?",
+                options: [
+                    { text: "전혀 관심 없음", scores: { artistic: 0 } },
+                    { text: "감상하는 정도", scores: { artistic: 1 } },
+                    { text: "취미로 즐김", scores: { artistic: 3, creative: 2 } },
+                    { text: "전문적으로 하고 싶음", scores: { artistic: 5, creative: 5, art: 5 } }
+                ]
+            },
+            {
+                q: "음식 관련 작업은?",
+                options: [
+                    { text: "전혀 관심 없음", scores: { food: 0 } },
+                    { text: "관심은 있음", scores: { food: 2 } },
+                    { text: "좋아함", scores: { food: 4, service: 2 } },
+                    { text: "매우 열정적", scores: { food: 5, culinary: 5 } }
+                ]
+            },
+            {
+                q: "건강/의료 분야 관심은?",
+                options: [
+                    { text: "관심 없음", scores: { health: 0 } },
+                    { text: "약간 관심", scores: { health: 2 } },
+                    { text: "관심 많음", scores: { health: 4, care: 3 } },
+                    { text: "전문직 희망", scores: { health: 5, medical: 5, professional: 4 } }
+                ]
+            },
+            {
+                q: "운전이나 운송 업무는?",
+                options: [
+                    { text: "싫어함", scores: { driving: 0 } },
+                    { text: "필요하면 함", scores: { driving: 2 } },
+                    { text: "좋아함", scores: { driving: 4, mobile: 3 } },
+                    { text: "매우 좋아함", scores: { driving: 5, transport: 5 } }
+                ]
+            },
+            {
+                q: "건설/시공 작업은?",
+                options: [
+                    { text: "관심 없음", scores: { construction: 0 } },
+                    { text: "조금 관심", scores: { construction: 2 } },
+                    { text: "관심 많음", scores: { construction: 4, handson: 3, physical: 3 } },
+                    { text: "전문가 되고 싶음", scores: { construction: 5, technical: 4, manual: 4 } }
+                ]
+            },
+            {
+                q: "전기/전자 작업은?",
+                options: [
+                    { text: "두렵고 어려움", scores: { electrical: 0 } },
+                    { text: "기본만 가능", scores: { electrical: 2 } },
+                    { text: "잘 다룸", scores: { electrical: 4, technical: 3 } },
+                    { text: "전문가 수준", scores: { electrical: 5, tech: 4, technical: 5 } }
+                ]
+            },
+            {
+                q: "판매/영업 활동은?",
+                options: [
+                    { text: "싫어함", scores: { sales: 0 } },
+                    { text: "어쩔 수 없이", scores: { sales: 2 } },
+                    { text: "좋아함", scores: { sales: 4, social: 3 } },
+                    { text: "매우 잘함", scores: { sales: 5, business: 5, social: 4 } }
+                ]
+            },
+            {
+                q: "연구와 분석 작업은?",
+                options: [
+                    { text: "지루함", scores: { research: 0 } },
+                    { text: "필요시에만", scores: { research: 2 } },
+                    { text: "흥미로움", scores: { research: 4, analytical: 4 } },
+                    { text: "열정적", scores: { research: 5, science: 5, analytical: 5 } }
+                ]
+            },
+            {
+                q: "교육/지도 활동은?",
+                options: [
+                    { text: "어려움", scores: { teaching: 0 } },
+                    { text: "가능함", scores: { teaching: 2 } },
+                    { text: "잘함", scores: { teaching: 4, social: 3 } },
+                    { text: "천직", scores: { teaching: 5, education: 5, helping: 4 } }
+                ]
+            },
+            {
+                q: "법률/행정 업무는?",
+                options: [
+                    { text: "관심 없음", scores: { legal: 0 } },
+                    { text: "조금 관심", scores: { legal: 2 } },
+                    { text: "관심 많음", scores: { legal: 4, conventional: 3 } },
+                    { text: "전문가 희망", scores: { legal: 5, professional: 5 } }
+                ]
+            },
+            {
+                q: "금융/재무 업무는?",
+                options: [
+                    { text: "어려움", scores: { finance: 0 } },
+                    { text: "기본만", scores: { finance: 2 } },
+                    { text: "잘 다룸", scores: { finance: 4, analytical: 3 } },
+                    { text: "전문가 수준", scores: { finance: 5, professional: 4, business: 3 } }
+                ]
+            },
+            {
+                q: "청소/정리 업무는?",
+                options: [
+                    { text: "싫어함", scores: { cleaning: 0 } },
+                    { text: "필요하면", scores: { cleaning: 2 } },
+                    { text: "괜찮음", scores: { cleaning: 4, service: 2 } },
+                    { text: "좋아함", scores: { cleaning: 5, service: 3 } }
+                ]
+            },
+            {
+                q: "보안/경비 업무는?",
+                options: [
+                    { text: "관심 없음", scores: { security: 0 } },
+                    { text: "조금 관심", scores: { security: 2 } },
+                    { text: "관심 많음", scores: { security: 4, responsibility: 3 } },
+                    { text: "적합함", scores: { security: 5, responsibility: 4 } }
+                ]
+            },
+            {
+                q: "돌봄/간병 업무는?",
+                options: [
+                    { text: "힘들 것 같음", scores: { care: 0 } },
+                    { text: "가능함", scores: { care: 2 } },
+                    { text: "보람 느낌", scores: { care: 4, helping: 4 } },
+                    { text: "천직", scores: { care: 5, helping: 5, service: 4 } }
+                ]
+            },
+            {
+                q: "미용/뷰티 분야는?",
+                options: [
+                    { text: "관심 없음", scores: { beauty: 0 } },
+                    { text: "조금 관심", scores: { beauty: 2 } },
+                    { text: "관심 많음", scores: { beauty: 4, creative: 2, service: 2 } },
+                    { text: "전문가 희망", scores: { beauty: 5, artistic: 3, service: 3 } }
+                ]
+            }
+        ];
+
+        const jobDatabase = {
+            "소프트웨어개발자": { tech: 5, it: 5, analytical: 5, office: 5 },
+            "웹개발자": { tech: 5, it: 5, creative: 3, office: 5 },
+            "데이터베이스개발자": { tech: 5, it: 5, analytical: 5, office: 5 },
+            "네트워크관리자": { tech: 5, it: 4, technical: 4, office: 4 },
+            "정보보안전문가": { tech: 5, it: 5, analytical: 5, office: 5 },
+            
+            "의사": { medical: 5, professional: 5, health: 5, education: 5, responsibility: 5 },
+            "간호사": { medical: 4, health: 5, care: 5, helping: 5, service: 4 },
+            "약사": { medical: 4, professional: 5, health: 5, education: 5 },
+            "물리치료사": { health: 5, care: 4, helping: 5, professional: 4 },
+            "영양사": { health: 5, care: 3, service: 3 },
+            
+            "교사": { teaching: 5, education: 5, helping: 4, social: 4, responsibility: 4 },
+            "교수": { teaching: 5, education: 5, research: 5, professional: 5, analytical: 5 },
+            "학원강사": { teaching: 5, education: 4, social: 3 },
+            
+            "변호사": { legal: 5, professional: 5, education: 5, analytical: 5, responsibility: 5 },
+            "판사": { legal: 5, professional: 5, education: 5, responsibility: 5, analytical: 5 },
+            "법무사": { legal: 5, professional: 4, office: 4, conventional: 4 },
+            
+            "회계사": { finance: 5, professional: 5, analytical: 5, office: 5, conventional: 4 },
+            "세무사": { finance: 5, professional: 5, analytical: 4, office: 5 },
+            "은행사무원": { finance: 4, office: 5, conventional: 5, service: 3 },
+            
+            "한식조리사": { food: 5, culinary: 5, creative: 3, handson: 4 },
+            "양식조리사": { food: 5, culinary: 5, creative: 3, handson: 4 },
+            "제과제빵원": { food: 5, creative: 3, handson: 4 },
+            "바텐더": { food: 4, creative: 3, service: 4, social: 3 },
+            
+            "건축가": { construction: 5, creative: 5, technical: 5, professional: 5, analytical: 4 },
+            "건축시공기술자": { construction: 5, technical: 5, handson: 4, responsibility: 4 },
+            "토목기술자": { construction: 5, technical: 5, analytical: 4, outdoor: 3 },
+            "건축목공": { construction: 5, handson: 5, manual: 5, technical: 4 },
+            "미장공": { construction: 5, handson: 5, manual: 5, physical: 4 },
+            "타일시공원": { construction: 5, handson: 5, manual: 4, physical: 4 },
+            "배관공": { construction: 5, handson: 5, technical: 4, manual: 4 },
+            
+            "전기기사": { electrical: 5, technical: 5, handson: 4, construction: 3 },
+            "전자제품수리원": { electrical: 5, technical: 5, handson: 4, manual: 3 },
+            "통신장비기사": { electrical: 4, technical: 5, tech: 4 },
+            
+            "자동차정비원": { mechanical: 5, handson: 5, technical: 5, manual: 4 },
+            "기계조립원": { mechanical: 5, handson: 5, manual: 5, technical: 3 },
+            "용접원": { mechanical: 5, handson: 5, manual: 5, technical: 4, physical: 4 },
+            
+            "택시운전원": { driving: 5, transport: 5, mobile: 5, service: 3 },
+            "버스운전원": { driving: 5, transport: 5, responsibility: 4 },
+            "화물차운전원": { driving: 5, transport: 5, physical: 3 },
+            "택배원": { driving: 4, transport: 5, mobile: 5, physical: 4, service: 3 },
+            
+            "경찰관": { security: 5, responsibility: 5, physical: 4, emergency: 4 },
+            "소방관": { security: 5, emergency: 5, physical: 5, responsibility: 5, helping: 4 },
+            "경비원": { security: 5, responsibility: 3, physical: 2 },
+            
+            "사회복지사": { helping: 5, care: 5, service: 5, social: 5 },
+            "요양보호사": { care: 5, helping: 5, service: 5, physical: 3 },
+            "간병인": { care: 5, helping: 5, service: 5, physical: 4 },
+            "육아도우미": { care: 5, helping: 5, service: 4 },
+            
+            "영업사원": { sales: 5, business: 5, social: 5, mobile: 3 },
+            "판매원": { sales: 5, service: 4, social: 4 },
+            "텔레마케터": { sales: 4, social: 4, service: 3 },
+            
+            "청소원": { cleaning: 5, service: 4, physical: 4 },
+            "환경미화원": { cleaning: 5, service: 4, physical: 4, outdoor: 3 },
+            "가사도우미": { cleaning: 4, service: 5, care: 3 },
+            
+            "이용사": { beauty: 5, service: 4, creative: 3, handson: 4 },
+            "미용사": { beauty: 5, creative: 4, service: 4, artistic: 3, handson: 4 },
+            "피부관리사": { beauty: 5, service: 4, care: 3 },
+            "네일아티스트": { beauty: 5, creative: 4, artistic: 4, handson: 4 },
+            "메이크업아티스트": { beauty: 5, creative: 5, artistic: 4 },
+            
+            "화가": { art: 5, creative: 5, artistic: 5, autonomy: 4 },
+            "디자이너": { art: 5, creative: 5, artistic: 5, tech: 3 },
+            "사진작가": { art: 5, creative: 5, artistic: 5, tech: 3 },
+            "만화가": { art: 5, creative: 5, artistic: 5, autonomy: 4 },
+            
+            "가수": { art: 5, creative: 5, artistic: 5, social: 4 },
+            "연주가": { art: 5, creative: 4, artistic: 5 },
+            "무용가": { art: 5, creative: 5, artistic: 5, physical: 5 },
+            
+            "연구원": { research: 5, science: 5, analytical: 5, education: 5 },
+            "생물학연구원": { research: 5, science: 5, analytical: 5, education: 5 },
+            "화학연구원": { research: 5, science: 5, analytical: 5, education: 5 },
+            
+            "작가": { creative: 5, artistic: 5, autonomy: 5 },
+            "기자": { creative: 3, social: 5, analytical: 4, mobile: 4 },
+            "번역가": { analytical: 4, office: 5, autonomy: 4 },
+            
+            "운동선수": { physical: 5, risk: 4, autonomy: 3 },
+            "스포츠강사": { physical: 5, teaching: 4, social: 4 },
+            
+            "농업인": { outdoor: 5, physical: 4, manual: 5, autonomy: 4 },
+            "어부": { outdoor: 5, physical: 5, manual: 4, risk: 4 },
+            
+            "행정사무원": { office: 5, conventional: 5, analytical: 3 },
+            "비서": { office: 5, conventional: 4, service: 4, social: 3 },
+            "안내원": { service: 5, social: 5, office: 3 },
+            "고객상담원": { service: 5, social: 5, office: 4 }
+        };
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                return;
+            }
+            
+            if (username === 'admin' && password === '100727') {
+                currentUser = 'admin';
+                showAdminPage();
+            } else if (password === '123456') {
+                currentUser = username;
+                document.getElementById('welcomeText').textContent = `${username}님 환영합니다!`;
+                document.getElementById('welcomeTextTest').textContent = `${username}님`;
+                
+                const userData = getUserData(username);
+                if (userData && userData.result) {
+                    showResult(userData.result);
+                } else {
+                    showStartScreen();
+                }
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        }
+
+        function showAdminPage() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminScreen').classList.add('active');
+            loadAllUserData();
+        }
+
+        function loadAllUserData() {
+            const userListDiv = document.getElementById('userList');
+            userListDiv.innerHTML = '';
+            
+            const allUsers = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('user_')) {
+                    const userData = JSON.parse(localStorage.getItem(key));
+                    allUsers.push({ username: key.replace('user_', ''), data: userData });
+                }
+            }
+            
+            if (allUsers.length === 0) {
+                userListDiv.innerHTML = '<p style="text-align: center; color: #666;">아직 등록된 사용자가 없습니다.</p>';
+                return;
+            }
+            
+            allUsers.forEach(user => {
+                const userCard = document.createElement('div');
+                userCard.className = 'user-card';
+                
+                let resultText = user.data.result ? 
+                    `<strong>추천 직업:</strong> ${user.data.result}<br>` : 
+                    '<strong>상태:</strong> 검사 미완료<br>';
+                
+                let answersText = '';
+                if (user.data.answers) {
+                    answersText = '<strong>답변 내용:</strong><br>';
+                    Object.keys(user.data.answers).forEach(qNum => {
+                        answersText += `질문 ${parseInt(qNum) + 1}: ${user.data.answers[qNum]}<br>`;
+                    });
+                }
+                
+                userCard.innerHTML = `
+                    <h3>👤 ${user.username}</h3>
+                    <div class="user-info">
+                        ${resultText}
+                        <strong>최근 접속:</strong> ${user.data.lastLogin || '정보 없음'}<br>
+                        ${answersText}
+                    </div>
+                `;
+                userListDiv.appendChild(userCard);
+            });
+        }
+
+        function showStartScreen() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'block';
+        }
+
+        function logout() {
+            currentUser = null;
+            currentQuestion = 0;
+            answers = {};
+            
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('adminScreen').classList.remove('active');
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('testContent').style.display = 'none';
+            document.getElementById('resultScreen').classList.remove('active');
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function getUserData(username) {
+            const data = localStorage.getItem('user_' + username);
+            return data ? JSON.parse(data) : null;
+        }
+
+        function saveUserData(username, data) {
+            data.lastLogin = new Date().toLocaleString('ko-KR');
+            localStorage.setItem('user_' + username, JSON.stringify(data));
+        }
+
+        function startTest() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('testContent').style.display = 'block';
+            currentQuestion = 0;
+            answers = {};
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-container active';
+            
+            const q = questions[currentQuestion];
+            questionDiv.innerHTML = `
+                <div class="question">${currentQuestion + 1}. ${q.q}</div>
+                <div class="options" id="options-${currentQuestion}"></div>
+            `;
+            
+            container.appendChild(questionDiv);
+            
+            const optionsDiv = document.getElementById(`options-${currentQuestion}`);
+            q.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option.text;
+                optionDiv.onclick = () => selectOption(index);
+                optionsDiv.appendChild(optionDiv);
+            });
+            
+            updateProgress();
+            updateButtons();
+        }
+
+        function selectOption(optionIndex) {
+            answers[currentQuestion] = optionIndex;
+            
+            const options = document.querySelectorAll(`#options-${currentQuestion} .option`);
+            options.forEach((opt, idx) => {
+                opt.classList.toggle('selected', idx === optionIndex);
+            });
+            
+            document.getElementById('btnNext').disabled = false;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `${currentQuestion + 1} / ${questions.length}`;
+        }
+
+        function updateButtons() {
+            document.getElementById('btnPrev').style.display = currentQuestion > 0 ? 'block' : 'none';
+            document.getElementById('btnNext').disabled = answers[currentQuestion] === undefined;
+            document.getElementById('btnNext').textContent = currentQuestion === questions.length - 1 ? '결과 보기' : '다음';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                calculateResult();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function calculateResult() {
+            const scores = {};
+            
+            Object.keys(answers).forEach(qIndex => {
+                const question = questions[qIndex];
+                const selectedOption = question.options[answers[qIndex]];
+                
+                Object.keys(selectedOption.scores).forEach(category => {
+                    scores[category] = (scores[category] || 0) + selectedOption.scores[category];
+                });
+            });
+            
+            let bestJob = null;
+            let highestScore = -1;
+            
+            Object.keys(jobDatabase).forEach(job => {
+                let jobScore = 0;
+                const jobRequirements = jobDatabase[job];
+                
+                Object.keys(jobRequirements).forEach(category => {
+                    if (scores[category]) {
+                        jobScore += scores[category] * jobRequirements[category];
+                    }
+                });
+                
+                if (jobScore > highestScore) {
+                    highestScore = jobScore;
+                    bestJob = job;
+                }
+            });
+            
+            saveUserData(currentUser, { answers: answers, result: bestJob });
+            showResult(bestJob);
+        }
+
+        function showResult(job) {
+            document.getElementById('testContent').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('resultScreen').classList.add('active');
+            document.getElementById('resultJob').textContent = job;
+            document.getElementById('resultDescription').textContent = 
+                `당신의 성향과 선호도를 분석한 결과, "${job}" 직업이 가장 적합합니다! 이 직업은 당신의 강점을 최대한 발휘할 수 있는 분야입니다.`;
+        }
+
+        function restartTest() {
+            currentQuestion = 0;
+            answers = {};
+            document.getElementById('resultScreen').classList.remove('active');
+            showStartScreen();
+        }
+    </script>
+</body>
+</html>
